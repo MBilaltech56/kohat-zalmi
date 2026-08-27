@@ -1367,3 +1367,222 @@ async function loadDataFromSupabase() {
 }
 
 loadDataFromSupabase();
+// =====================================================
+// ADMIN AUTHENTICATION
+// =====================================================
+
+const ADMIN_USER_ID =
+  "f62ca7bc-486d-462f-92dd-6415e0e90973";
+
+let isAdmin = false;
+
+
+// Check if current user is the owner
+async function updateAuthUI() {
+
+  const {
+    data: {
+      session
+    }
+  } = await supabaseClient.auth.getSession();
+
+  isAdmin =
+    !!session &&
+    session.user.id === ADMIN_USER_ID;
+
+
+  const authBtn = $("#authBtn");
+  const authStatus = $("#authStatus");
+
+
+  if (authBtn) {
+
+    authBtn.textContent =
+      isAdmin
+        ? "🔓 Logout"
+        : "🔐 Admin Login";
+  }
+
+
+  if (authStatus) {
+
+    authStatus.textContent =
+      isAdmin
+        ? "Admin Mode"
+        : "Viewing as Guest";
+  }
+
+
+  updateAdminControls();
+}
+
+
+// Show/hide admin controls
+function updateAdminControls() {
+
+  $$(".admin-only").forEach(el => {
+
+    el.style.display =
+      isAdmin ? "" : "none";
+
+  });
+
+}
+
+
+// Login / Logout button
+$("#authBtn")?.addEventListener(
+  "click",
+  async () => {
+
+    if (isAdmin) {
+
+      await supabaseClient.auth.signOut();
+
+      isAdmin = false;
+
+      updateAuthUI();
+
+      alert("Logged out.");
+
+      return;
+    }
+
+
+    $("#loginModal")
+      ?.classList.add("show");
+
+  }
+);
+
+
+// Close login window
+$("#closeLoginModal")?.addEventListener(
+  "click",
+  () => {
+
+    $("#loginModal")
+      ?.classList.remove("show");
+
+  }
+);
+
+
+// Close login when clicking outside
+$("#loginModal")?.addEventListener(
+  "click",
+  e => {
+
+    if (
+      e.target.id === "loginModal"
+    ) {
+
+      $("#loginModal")
+        .classList.remove("show");
+
+    }
+
+  }
+);
+
+
+// Login form
+$("#loginForm")?.addEventListener(
+  "submit",
+  async e => {
+
+    e.preventDefault();
+
+
+    const email =
+      $("#loginEmail")
+        .value
+        .trim();
+
+    const password =
+      $("#loginPassword")
+        .value;
+
+
+    const message =
+      $("#loginMessage");
+
+
+    message.textContent =
+      "Logging in...";
+
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient.auth
+        .signInWithPassword({
+
+          email: email,
+
+          password: password
+
+        });
+
+
+    if (error) {
+
+      message.textContent =
+        "Login failed: " +
+        error.message;
+
+      return;
+    }
+
+
+    // Make sure this is YOUR account
+    if (
+      data.user.id !==
+      ADMIN_USER_ID
+    ) {
+
+      await supabaseClient.auth
+        .signOut();
+
+      message.textContent =
+        "This account is not the website owner.";
+
+      return;
+    }
+
+
+    $("#loginModal")
+      .classList.remove("show");
+
+
+    $("#loginForm")
+      .reset();
+
+
+    message.textContent = "";
+
+
+    await updateAuthUI();
+
+
+    alert(
+      "Admin login successful!"
+    );
+
+  }
+);
+
+
+// Detect login/logout automatically
+supabaseClient.auth.onAuthStateChange(
+  () => {
+
+    updateAuthUI();
+
+  }
+);
+
+
+// Check login when website opens
+updateAuthUI();
