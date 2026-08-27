@@ -1,4 +1,11 @@
 // Kohat Zalmi Cricket Dashboard — no demo data. All data stays in this browser.
+const SUPABASE_URL = "https://szojybwguxkydkdombqo.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_yKCdQBSPvkisSWncHbGmBg_-6u9DEyP";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_PUBLISHABLE_KEY
+);
 const STORAGE_KEY="kzDataV3";
 const THEME_KEY="kzTheme";
 
