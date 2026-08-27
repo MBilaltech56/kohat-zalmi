@@ -10,6 +10,19 @@ const STORAGE_KEY="kzDataV3";
 const THEME_KEY="kzTheme";
 
 let state=JSON.parse(localStorage.getItem(STORAGE_KEY)||"null")||{players:[],matches:[]};
+async function loadPlayersFromSupabase() {
+  const { data, error } = await supabaseClient
+    .from("kohat zalmi")
+    .select("*")
+    .order("id", { ascending: true });
+
+  if (error) {
+    console.error("Supabase player loading error:", error);
+    return;
+  }
+
+  state.players = data || [];
+}
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const avg=p=>p.dismissals?p.runs/p.dismissals:0;
 const sr=p=>p.balls?p.runs/p.balls*100:0;
@@ -162,4 +175,6 @@ const savedTheme=localStorage.getItem(THEME_KEY);
 setTheme(savedTheme||((new Date()).getHours()>=18||(new Date()).getHours()<6?"night":"day"));
 $("#themeBtn").onclick=()=>setTheme(document.body.classList.contains("night")?"day":"night");
 
-render();
+loadPlayersFromSupabase().then(() => {
+  render();
+});
