@@ -1,161 +1,1648 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kohat Zalmi | Cricket Performance</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Kohat Zalmi Cricket Dashboard</title>
+
+  <meta
+    name="description"
+    content="Kohat Zalmi Cricket Team performance dashboard"
+  >
+
+  <!-- Supabase -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+  </script>
+
+  <!-- Main stylesheet -->
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="logo">KZ</div>
-      <div><b>KOHAT ZALMI</b><small>Cricket Performance</small></div>
-    </div>
-    <nav>
-      <button class="nav active" data-page="dashboard">⌂ Dashboard</button>
-      <button class="nav" data-page="players">👤 Players</button>
-      <button class="nav" data-page="matches">🏏 Matches</button>
-      <button class="nav" data-page="rankings">🏆 Rankings</button>
-      <button class="nav" data-page="analytics">◔ Analytics</button>
-      <button class="nav" data-page="venues">📍 Venues</button>
-      <button class="nav" data-page="add">＋ Add Performance</button>
-    </nav>
-    <div class="side-note">Private team dashboard<br><span>Data stays in this browser</span></div>
-  </aside>
 
-  <main>
-    <header class="topbar">
-      <div>
-        <h1 id="pageTitle">Team Dashboard</h1>
-        <p id="pageSub">Kohat Zalmi performance center</p>
-      </div>
-      <div class="actions">
-        <button class="ghost" id="themeBtn" title="Switch day/night mood">🌙 Night</button>
-        <button class="ghost" id="exportBtn">Export Data</button>
-        <button class="ghost danger" id="clearBtn">Clear All Data</button>
-      </div>
-    </header>
+  <!-- =========================
+       APP
+  ========================== -->
 
-    <section id="dashboard" class="page active">
-      <div class="hero">
-        <img src="kohat-zalmi-hero.jpg" alt="Kohat Zalmi team" />
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-          <span class="eyebrow">KOHAT ZALMI • TEAM PERFORMANCE</span>
-          <h2>Every match. Every player. Every statistic.</h2>
-          <p>Track batting, bowling, match results, venues and player rankings in one private cricket dashboard.</p>
-          <div class="hero-buttons">
-            <button class="primary" data-go="players">View Players</button>
-            <button class="hero-ghost" data-go="analytics">Open Analytics</button>
-          </div>
+  <div id="app">
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar">
+
+      <div class="brand">
+        <div class="brand-logo">
+          KZ
         </div>
-        <div class="hero-mark">KZ</div>
+
+        <div>
+          <h2>Kohat Zalmi</h2>
+          <span>Cricket Club</span>
+        </div>
       </div>
 
-      <div class="cards" id="summaryCards"></div>
+      <nav>
 
-      <div class="dashboard-grid">
-        <div class="panel">
-          <div class="panel-head"><h3>Match Record</h3><button class="textbtn" data-go="matches">View all →</button></div>
-          <div class="record">
-            <div class="record-circle" id="winCircle"><div><b id="winPct">0%</b><span>Win Rate</span></div></div>
-            <div class="record-stats">
-              <div><span class="dot win-dot"></span><b id="wins">0</b><small>Won</small></div>
-              <div><span class="dot loss-dot"></span><b id="losses">0</b><small>Lost</small></div>
-              <div><span class="dot tie-dot"></span><b id="ties">0</b><small>Tied</small></div>
-              <div><span class="dot nr-dot"></span><b id="nr">0</b><small>No Result</small></div>
+        <button
+          class="nav active"
+          data-page="dashboard">
+          🏠
+          <span>Dashboard</span>
+        </button>
+
+        <button
+          class="nav"
+          data-page="players">
+          👥
+          <span>Players</span>
+        </button>
+
+        <button
+          class="nav"
+          data-page="matches">
+          🏏
+          <span>Matches</span>
+        </button>
+
+        <button
+          class="nav"
+          data-page="rankings">
+          🏆
+          <span>Rankings</span>
+        </button>
+
+        <button
+          class="nav"
+          data-page="analytics">
+          📊
+          <span>Analytics</span>
+        </button>
+
+        <button
+          class="nav"
+          data-page="venues">
+          📍
+          <span>Venues</span>
+        </button>
+
+      </nav>
+
+      <div class="sidebar-bottom">
+
+        <button
+          class="nav"
+          data-page="addPlayer">
+          ➕
+          <span>Add Player</span>
+        </button>
+
+        <button
+          class="nav"
+          data-page="add">
+          📝
+          <span>Add Performance</span>
+        </button>
+
+      </div>
+
+    </aside>
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <main class="main">
+
+      <!-- TOP HEADER -->
+
+      <header class="topbar">
+
+        <div class="page-heading">
+
+          <h1 id="pageTitle">
+            Team Dashboard
+          </h1>
+
+          <p id="pageSub">
+            Kohat Zalmi performance center
+          </p>
+
+        </div>
+
+
+        <div class="top-actions">
+
+          <!-- Day / Night -->
+
+          <button
+            id="themeBtn"
+            class="action-btn">
+            🌙 Night
+          </button>
+
+
+          <!-- Admin Login -->
+
+          <button
+            id="authBtn"
+            class="action-btn">
+            🔐 Admin Login
+          </button>
+
+
+          <span
+            id="authStatus"
+            class="muted">
+            Viewing as Guest
+          </span>
+
+        </div>
+
+      </header>
+
+
+      <!-- =========================
+           PAGE CONTAINER
+      ========================== -->
+
+      <div class="content">
+
+
+        <!-- =========================
+             DASHBOARD
+        ========================== -->
+
+        <section
+          id="dashboard"
+          class="page active">
+
+          <div
+            id="summaryCards"
+            class="stats-grid">
+          </div>
+
+
+          <div class="dashboard-grid">
+
+
+            <!-- MATCH RESULTS -->
+
+            <div class="panel">
+
+              <div class="panel-head">
+
+                <div>
+                  <h2>Match Results</h2>
+
+                  <p class="muted">
+                    Team performance overview
+                  </p>
+                </div>
+
+              </div>
+
+
+              <div class="result-layout">
+
+                <div
+                  id="winCircle"
+                  class="win-circle">
+
+                  <div>
+                    <strong id="winPct">
+                      0%
+                    </strong>
+
+                    <span>
+                      Win Rate
+                    </span>
+                  </div>
+
+                </div>
+
+
+                <div class="result-list">
+
+                  <div>
+                    <span>Won</span>
+                    <b id="wins">0</b>
+                  </div>
+
+                  <div>
+                    <span>Lost</span>
+                    <b id="losses">0</b>
+                  </div>
+
+                  <div>
+                    <span>Tied</span>
+                    <b id="ties">0</b>
+                  </div>
+
+                  <div>
+                    <span>No Result</span>
+                    <b id="nr">0</b>
+                  </div>
+
+                </div>
+
+              </div>
+
             </div>
+
+
+            <!-- TOP PERFORMERS -->
+
+            <div class="panel">
+
+              <div class="panel-head">
+
+                <div>
+                  <h2>Top Performers</h2>
+
+                  <p class="muted">
+                    Leading players by runs
+                  </p>
+                </div>
+
+                <button
+                  class="action-btn"
+                  data-go="rankings">
+                  View Rankings
+                </button>
+
+              </div>
+
+              <div id="topPerformers">
+              </div>
+
+            </div>
+
           </div>
-        </div>
 
-        <div class="panel">
-          <div class="panel-head"><h3>Top Performers</h3><button class="textbtn" data-go="rankings">Rankings →</button></div>
-          <div id="topPerformers"></div>
-        </div>
-      </div>
 
-      <div class="grid2">
-        <div class="panel"><div class="panel-head"><h3>Recent Matches</h3><button class="textbtn" data-go="matches">All matches →</button></div><div id="recentMatches"></div></div>
-        <div class="panel"><h3>Team Snapshot</h3><div id="snapshotBars"></div></div>
-      </div>
-    </section>
+          <!-- RECENT MATCHES -->
 
-    <section id="players" class="page">
-      <div class="toolbar"><input id="playerSearch" placeholder="Search player..." /><select id="roleFilter"><option value="all">All roles</option><option>Batter</option><option>Bowler</option><option>All-rounder</option><option>Wicketkeeper</option></select><button class="primary" data-go="addPlayer">＋ Add Player</button></div>
-      <div id="playersGrid" class="player-grid"></div>
-    </section>
+          <div class="panel">
 
-    <section id="matches" class="page">
-      <div class="toolbar"><select id="matchSeason"><option value="all">All seasons</option><option>2026</option><option>2025</option></select><button class="primary" data-go="add">＋ Add match performance</button></div>
-      <div class="table-wrap"><table><thead><tr><th>Date</th><th>Opponent</th><th>Venue</th><th>Result</th><th>Score</th><th>Best batting</th><th>Best bowling</th><th>Action</th></tr></thead><tbody id="matchesTable"></tbody></table></div>
-    </section>
+            <div class="panel-head">
 
-    <section id="rankings" class="page">
-      <div class="ranking-grid">
-        <div class="panel"><h3>🥇 Top 3 Batters</h3><div id="batRank"></div></div>
-        <div class="panel"><h3>🎯 Top 3 Bowlers</h3><div id="bowlRank"></div></div>
-        <div class="panel"><h3>⭐ Top 3 All-rounders</h3><div id="arRank"></div></div>
-      </div>
-      <div class="panel"><h3>Full Player Ranking</h3><div class="table-wrap"><table><thead><tr><th>#</th><th>Player</th><th>Role</th><th>Runs</th><th>Avg</th><th>SR</th><th>Wkts</th><th>Eco</th><th>Matches</th></tr></thead><tbody id="rankingTable"></tbody></table></div></div>
-    </section>
+              <div>
+                <h2>Recent Matches</h2>
 
-    <section id="analytics" class="page">
-      <div class="cards" id="analyticsCards"></div>
-      <div class="analytics-grid">
-        <div class="panel"><h3>Win / Loss Analysis</h3><div id="resultBars"></div></div>
-        <div class="panel"><h3>Team Performance Bars</h3><div id="performanceBars"></div></div>
-      </div>
-      <div class="panel"><h3>Player Efficiency</h3><div id="playerEfficiency"></div></div>
-    </section>
+                <p class="muted">
+                  Latest recorded matches
+                </p>
+              </div>
 
-    <section id="venues" class="page">
-      <div class="cards" id="venueCards"></div>
-      <div class="panel"><h3>Venue Performance</h3><div class="table-wrap"><table><thead><tr><th>Venue</th><th>Matches</th><th>Wins</th><th>Win %</th></tr></thead><tbody id="venueTable"></tbody></table></div></div>
-    </section>
+              <button
+                class="action-btn"
+                data-go="matches">
+                All Matches
+              </button>
 
-    <section id="addPlayer" class="page">
-      <div class="panel form-panel">
-        <div class="panel-head"><div><h3>Add Player</h3><div class="muted">Create a player profile with jersey number, role and photo.</div></div><button class="textbtn" data-go="players">← Players</button></div>
-        <form id="playerForm">
-          <div class="form-grid-inner">
-            <label>Player name<input name="name" placeholder="e.g. Ahmad Khan" required></label>
-            <label>Jersey number<input type="number" name="jersey" min="0" max="999" placeholder="10" required></label>
-            <label>Role<select name="role"><option>Batter</option><option>Bowler</option><option>All-rounder</option><option>Wicketkeeper</option></select></label>
-            <label>Player photo<input type="file" name="photo" accept="image/*"></label>
+            </div>
+
+            <div id="recentMatches">
+            </div>
+
           </div>
-          <div class="photo-preview-wrap"><img id="photoPreview" class="photo-preview" alt="Photo preview"><span id="photoHint">Optional • upload a player photo</span></div>
-          <button class="primary" type="submit">Save Player</button>
-        </form>
-      </div>
-    </section>
 
-    <section id="add" class="page">
-      <div class="form-grid">
-        <div class="panel"><h3>Add Match</h3><form id="matchForm">
-          <label>Date<input type="date" name="date" required></label>
-          <label>Opponent<input name="opponent" placeholder="e.g. Peshawar XI" required></label>
-          <label>Venue<input name="venue" placeholder="e.g. Kohat Cricket Ground" required></label>
-          <label>Result<select name="result"><option>Won</option><option>Lost</option><option>Tied</option><option>No Result</option></select></label>
-          <label>Kohat Zalmi Score<input name="score" placeholder="e.g. 168/7 (20 ov)" required></label>
-          <button class="primary" type="submit">Save Match</button>
-        </form></div>
-        <div class="panel"><h3>Add Player Performance</h3><form id="perfForm">
-          <label>Player<select name="player" id="perfPlayer"></select></label>
-          <label>Runs<input type="number" name="runs" min="0" value="0"></label>
-          <label>Balls Faced<input type="number" name="balls" min="0" value="0"></label>
-          <label>Dismissed?<select name="dismissed"><option value="1">Yes</option><option value="0">No</option></select></label>
-          <label>Overs Bowled<input type="number" name="overs" min="0" step="0.1" value="0"></label>
-          <label>Runs Conceded<input type="number" name="conceded" min="0" value="0"></label>
-          <label>Wickets<input type="number" name="wickets" min="0" value="0"></label>
-          <button class="primary" type="submit">Save Performance</button>
-        </form></div>
-      </div>
-    </section>
-  </main>
 
-  <div class="modal" id="playerModal"><div class="modal-box"><button class="close" id="closeModal">×</button><div id="playerDetail"></div></div></div>
- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="app.js"></script>
+          <!-- SNAPSHOT -->
+
+          <div class="panel">
+
+            <div class="panel-head">
+
+              <div>
+                <h2>Team Snapshot</h2>
+
+                <p class="muted">
+                  Current team overview
+                </p>
+              </div>
+
+            </div>
+
+            <div id="snapshotBars">
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- =========================
+             PLAYERS
+        ========================== -->
+
+        <section
+          id="players"
+          class="page">
+
+          <div class="page-tools">
+
+            <div>
+
+              <h2>Players</h2>
+
+              <p class="muted">
+                Kohat Zalmi squad
+              </p>
+
+            </div>
+
+
+            <div class="tools">
+
+              <input
+                id="playerSearch"
+                type="search"
+                placeholder="Search player..."
+              >
+
+              <select id="roleFilter">
+
+                <option value="all">
+                  All Roles
+                </option>
+
+                <option value="Batsman">
+                  Batsman
+                </option>
+
+                <option value="Bowler">
+                  Bowler
+                </option>
+
+                <option value="All-rounder">
+                  All-rounder
+                </option>
+
+              </select>
+
+            </div>
+
+          </div>
+
+
+          <div
+            id="playersGrid"
+            class="players-grid">
+          </div>
+
+        </section>
+
+
+        <!-- =========================
+             MATCHES
+        ========================== -->
+
+        <section
+          id="matches"
+          class="page">
+
+          <div class="page-tools">
+
+            <div>
+
+              <h2>Matches</h2>
+
+              <p class="muted">
+                Team match history
+              </p>
+
+            </div>
+
+
+            <select id="matchSeason">
+
+              <option value="all">
+                All Matches
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <div class="panel table-panel">
+
+            <div class="table-wrap">
+
+              <table>
+
+                <thead>
+
+                  <tr>
+
+                    <th>Date</th>
+                    <th>Opponent</th>
+                    <th>Venue</th>
+                    <th>Result</th>
+                    <th>Score</th>
+                    <th>Best Batter</th>
+                    <th>Best Bowler</th>
+                    <th>Action</th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody id="matchesTable">
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- =========================
+             RANKINGS
+        ========================== -->
+
+        <section
+          id="rankings"
+          class="page">
+
+          <div class="page-tools">
+
+            <div>
+
+              <h2>Player Rankings</h2>
+
+              <p class="muted">
+                Current player performance
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="ranking-grid">
+
+            <div class="panel">
+
+              <h3>🏏 Top Batsmen</h3>
+
+              <div id="batRank">
+              </div>
+
+            </div>
+
+
+            <div class="panel">
+
+              <h3>🎯 Top Bowlers</h3>
+
+              <div id="bowlRank">
+              </div>
+
+            </div>
+
+
+            <div class="panel">
+
+              <h3>⭐ All-rounders</h3>
+
+              <div id="arRank">
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div class="panel table-panel">
+
+            <div class="table-wrap">
+
+              <table>
+
+                <thead>
+
+                  <tr>
+
+                    <th>#</th>
+                    <th>Player</th>
+                    <th>Role</th>
+                    <th>Runs</th>
+                    <th>Average</th>
+                    <th>Strike Rate</th>
+                    <th>Wickets</th>
+                    <th>Economy</th>
+                    <th>Matches</th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody id="rankingTable">
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- =========================
+             ANALYTICS
+        ========================== -->
+
+        <section
+          id="analytics"
+          class="page">
+
+          <div class="page-tools">
+
+            <div>
+
+              <h2>Analytics</h2>
+
+              <p class="muted">
+                Team and player statistics
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            id="analyticsCards"
+            class="stats-grid">
+          </div>
+
+
+          <div class="analytics-grid">
+
+            <div class="panel">
+
+              <h3>Match Results</h3>
+
+              <div id="resultBars">
+              </div>
+
+            </div>
+
+
+            <div class="panel">
+
+              <h3>Team Performance</h3>
+
+              <div id="performanceBars">
+              </div>
+
+            </div>
+
+
+            <div class="panel">
+
+              <h3>Player Efficiency</h3>
+
+              <div id="playerEfficiency">
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- =========================
+             VENUES
+        ========================== -->
+
+        <section
+          id="venues"
+          class="page">
+
+          <div class="page-tools">
+
+            <div>
+
+              <h2>Venues</h2>
+
+              <p class="muted">
+                Match performance by venue
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div
+            id="venueCards"
+            class="stats-grid">
+          </div>
+
+
+          <div class="panel table-panel">
+
+            <div class="table-wrap">
+
+              <table>
+
+                <thead>
+
+                  <tr>
+
+                    <th>Venue</th>
+                    <th>Matches</th>
+                    <th>Wins</th>
+                    <th>Win Rate</th>
+
+                  </tr>
+
+                </thead>
+
+                <tbody id="venueTable">
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </section>
+                <!-- =========================
+             ADD PLAYER
+        ========================== -->
+
+        <section
+          id="addPlayer"
+          class="page">
+
+          <div class="page-tools">
+
+            <div>
+              <h2>Add Player</h2>
+
+              <p class="muted">
+                Add a new Kohat Zalmi player
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="panel form-panel">
+
+            <form id="playerForm">
+
+              <div class="form-grid">
+
+                <div class="form-group">
+
+                  <label>
+                    Player Name
+                  </label>
+
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Enter player name"
+                    required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Jersey Number
+                  </label>
+
+                  <input
+                    type="number"
+                    name="jersey"
+                    placeholder="e.g. 10"
+                    min="0">
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Role
+                  </label>
+
+                  <select name="role" required>
+
+                    <option value="">
+                      Select role
+                    </option>
+
+                    <option value="Batsman">
+                      Batsman
+                    </option>
+
+                    <option value="Bowler">
+                      Bowler
+                    </option>
+
+                    <option value="All-rounder">
+                      All-rounder
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Player Photo
+                  </label>
+
+                  <input
+                    type="file"
+                    name="photo"
+                    accept="image/*">
+
+                  <small
+                    id="photoHint"
+                    class="muted">
+                    Optional • upload a player photo
+                  </small>
+
+                  <img
+                    id="photoPreview"
+                    class="photo-preview"
+                    alt="Photo preview">
+
+                </div>
+
+              </div>
+
+
+              <div class="form-actions">
+
+                <button
+                  type="submit"
+                  class="primary-btn admin-only">
+                  Add Player
+                </button>
+
+                <button
+                  type="reset"
+                  class="action-btn">
+                  Clear
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+
+        </section>
+
+
+        <!-- =========================
+             ADD PERFORMANCE
+        ========================== -->
+
+        <section
+          id="add"
+          class="page">
+
+          <div class="page-tools">
+
+            <div>
+
+              <h2>Add Performance</h2>
+
+              <p class="muted">
+                Record player performance
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="panel form-panel">
+
+            <form id="perfForm">
+
+              <div class="form-grid">
+
+
+                <div class="form-group">
+
+                  <label>
+                    Player
+                  </label>
+
+                  <select
+                    id="perfPlayer"
+                    name="player"
+                    required>
+
+                    <option value="">
+                      Select player
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Runs
+                  </label>
+
+                  <input
+                    type="number"
+                    name="runs"
+                    min="0"
+                    value="0">
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Balls
+                  </label>
+
+                  <input
+                    type="number"
+                    name="balls"
+                    min="0"
+                    value="0">
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Dismissed?
+                  </label>
+
+                  <select name="dismissed">
+
+                    <option value="0">
+                      No
+                    </option>
+
+                    <option value="1">
+                      Yes
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Overs Bowled
+                  </label>
+
+                  <input
+                    type="number"
+                    name="overs"
+                    min="0"
+                    step="0.1"
+                    value="0">
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Runs Conceded
+                  </label>
+
+                  <input
+                    type="number"
+                    name="conceded"
+                    min="0"
+                    value="0">
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Wickets
+                  </label>
+
+                  <input
+                    type="number"
+                    name="wickets"
+                    min="0"
+                    value="0">
+
+                </div>
+
+              </div>
+
+
+              <div class="form-actions">
+
+                <button
+                  type="submit"
+                  class="primary-btn admin-only">
+                  Save Performance
+                </button>
+
+                <button
+                  type="reset"
+                  class="action-btn">
+                  Clear
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+
+        </section>
+
+
+        <!-- =========================
+             MATCH ENTRY
+        ========================== -->
+
+        <section
+          id="matchEntry"
+          class="page">
+
+          <div class="page-tools">
+
+            <div>
+
+              <h2>Add Match</h2>
+
+              <p class="muted">
+                Record a Kohat Zalmi match
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="panel form-panel">
+
+            <form id="matchForm">
+
+              <div class="form-grid">
+
+
+                <div class="form-group">
+
+                  <label>
+                    Date
+                  </label>
+
+                  <input
+                    type="date"
+                    name="date"
+                    required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Opponent
+                  </label>
+
+                  <input
+                    type="text"
+                    name="opponent"
+                    placeholder="Opponent team"
+                    required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Venue
+                  </label>
+
+                  <input
+                    type="text"
+                    name="venue"
+                    placeholder="Match venue"
+                    required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Result
+                  </label>
+
+                  <select
+                    name="result"
+                    required>
+
+                    <option value="">
+                      Select result
+                    </option>
+
+                    <option value="Won">
+                      Won
+                    </option>
+
+                    <option value="Lost">
+                      Lost
+                    </option>
+
+                    <option value="Tied">
+                      Tied
+                    </option>
+
+                    <option value="No Result">
+                      No Result
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Score
+                  </label>
+
+                  <input
+                    type="text"
+                    name="score"
+                    placeholder="e.g. 156/7">
+
+                </div>
+
+              </div>
+
+
+              <div class="form-actions">
+
+                <button
+                  type="submit"
+                  class="primary-btn admin-only">
+                  Save Match
+                </button>
+
+                <button
+                  type="reset"
+                  class="action-btn">
+                  Clear
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+
+        </section>
+
+
+        <!-- =========================
+             PLAYER DETAIL MODAL
+        ========================== -->
+
+        <div
+          id="playerModal"
+          class="modal">
+
+          <div class="modal-box">
+
+            <button
+              id="closePlayerModal"
+              class="modal-close">
+              ×
+            </button>
+
+            <div id="playerDetail">
+            </div>
+
+          </div>
+
+        </div>
+                <!-- =========================
+             ADD PLAYER
+        ========================== -->
+
+        <section
+          id="addPlayer"
+          class="page">
+
+          <div class="page-tools">
+
+            <div>
+              <h2>Add Player</h2>
+
+              <p class="muted">
+                Add a new Kohat Zalmi player
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="panel form-panel">
+
+            <form id="playerForm">
+
+              <div class="form-grid">
+
+                <div class="form-group">
+
+                  <label>
+                    Player Name
+                  </label>
+
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Enter player name"
+                    required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Jersey Number
+                  </label>
+
+                  <input
+                    type="number"
+                    name="jersey"
+                    placeholder="e.g. 10"
+                    min="0">
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Role
+                  </label>
+
+                  <select name="role" required>
+
+                    <option value="">
+                      Select role
+                    </option>
+
+                    <option value="Batsman">
+                      Batsman
+                    </option>
+
+                    <option value="Bowler">
+                      Bowler
+                    </option>
+
+                    <option value="All-rounder">
+                      All-rounder
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Player Photo
+                  </label>
+
+                  <input
+                    type="file"
+                    name="photo"
+                    accept="image/*">
+
+                  <small
+                    id="photoHint"
+                    class="muted">
+                    Optional • upload a player photo
+                  </small>
+
+                  <img
+                    id="photoPreview"
+                    class="photo-preview"
+                    alt="Photo preview">
+
+                </div>
+
+              </div>
+
+
+              <div class="form-actions">
+
+                <button
+                  type="submit"
+                  class="primary-btn admin-only">
+                  Add Player
+                </button>
+
+                <button
+                  type="reset"
+                  class="action-btn">
+                  Clear
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+
+        </section>
+
+
+        <!-- =========================
+             ADD PERFORMANCE
+        ========================== -->
+
+        <section
+          id="add"
+          class="page">
+
+          <div class="page-tools">
+
+            <div>
+
+              <h2>Add Performance</h2>
+
+              <p class="muted">
+                Record player performance
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="panel form-panel">
+
+            <form id="perfForm">
+
+              <div class="form-grid">
+
+
+                <div class="form-group">
+
+                  <label>
+                    Player
+                  </label>
+
+                  <select
+                    id="perfPlayer"
+                    name="player"
+                    required>
+
+                    <option value="">
+                      Select player
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Runs
+                  </label>
+
+                  <input
+                    type="number"
+                    name="runs"
+                    min="0"
+                    value="0">
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Balls
+                  </label>
+
+                  <input
+                    type="number"
+                    name="balls"
+                    min="0"
+                    value="0">
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Dismissed?
+                  </label>
+
+                  <select name="dismissed">
+
+                    <option value="0">
+                      No
+                    </option>
+
+                    <option value="1">
+                      Yes
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Overs Bowled
+                  </label>
+
+                  <input
+                    type="number"
+                    name="overs"
+                    min="0"
+                    step="0.1"
+                    value="0">
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Runs Conceded
+                  </label>
+
+                  <input
+                    type="number"
+                    name="conceded"
+                    min="0"
+                    value="0">
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Wickets
+                  </label>
+
+                  <input
+                    type="number"
+                    name="wickets"
+                    min="0"
+                    value="0">
+
+                </div>
+
+              </div>
+
+
+              <div class="form-actions">
+
+                <button
+                  type="submit"
+                  class="primary-btn admin-only">
+                  Save Performance
+                </button>
+
+                <button
+                  type="reset"
+                  class="action-btn">
+                  Clear
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+
+        </section>
+
+
+        <!-- =========================
+             MATCH ENTRY
+        ========================== -->
+
+        <section
+          id="matchEntry"
+          class="page">
+
+          <div class="page-tools">
+
+            <div>
+
+              <h2>Add Match</h2>
+
+              <p class="muted">
+                Record a Kohat Zalmi match
+              </p>
+
+            </div>
+
+          </div>
+
+
+          <div class="panel form-panel">
+
+            <form id="matchForm">
+
+              <div class="form-grid">
+
+
+                <div class="form-group">
+
+                  <label>
+                    Date
+                  </label>
+
+                  <input
+                    type="date"
+                    name="date"
+                    required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Opponent
+                  </label>
+
+                  <input
+                    type="text"
+                    name="opponent"
+                    placeholder="Opponent team"
+                    required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Venue
+                  </label>
+
+                  <input
+                    type="text"
+                    name="venue"
+                    placeholder="Match venue"
+                    required>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Result
+                  </label>
+
+                  <select
+                    name="result"
+                    required>
+
+                    <option value="">
+                      Select result
+                    </option>
+
+                    <option value="Won">
+                      Won
+                    </option>
+
+                    <option value="Lost">
+                      Lost
+                    </option>
+
+                    <option value="Tied">
+                      Tied
+                    </option>
+
+                    <option value="No Result">
+                      No Result
+                    </option>
+
+                  </select>
+
+                </div>
+
+
+                <div class="form-group">
+
+                  <label>
+                    Score
+                  </label>
+
+                  <input
+                    type="text"
+                    name="score"
+                    placeholder="e.g. 156/7">
+
+                </div>
+
+              </div>
+
+
+              <div class="form-actions">
+
+                <button
+                  type="submit"
+                  class="primary-btn admin-only">
+                  Save Match
+                </button>
+
+                <button
+                  type="reset"
+                  class="action-btn">
+                  Clear
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+
+        </section>
+
+
+        <!-- =========================
+             PLAYER DETAIL MODAL
+        ========================== -->
+
+        <div
+          id="playerModal"
+          class="modal">
+
+          <div class="modal-box">
+
+            <button
+              id="closePlayerModal"
+              class="modal-close">
+              ×
+            </button>
+
+            <div id="playerDetail">
+            </div>
+
+          </div>
+
+        </div>
+        <script src="app.js"></script>
+
 </body>
 </html>
